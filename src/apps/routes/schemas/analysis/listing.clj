@@ -38,6 +38,9 @@
    (optional-key :enddate)
    (describe Timestamp "The time the analysis ended.")
 
+   (optional-key :planned_enddate)
+   (describe Timestamp "The planned end time for the analysis.")
+
    :id
    (describe UUID "The analysis ID.")
 
