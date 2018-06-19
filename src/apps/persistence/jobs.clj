@@ -60,6 +60,7 @@
    :result_folder_path
    :start_date
    :end_date
+   :planned_end_date
    :status
    :deleted
    :user_id
@@ -319,6 +320,7 @@
               :j.app_name
               [:j.job_description :description]
               :j.end_date
+              :j.planned_end_date
               :j.id
               :j.job_name
               :j.result_folder_path
@@ -399,7 +401,7 @@
   (-> (select* (job-base-query))
       (join [:job_steps :s] {:j.id :s.job_id})
       (fields [(sqlfn :array_agg :s.external_id) :external_ids])
-      (group :j.app_description :j.system_id :j.app_id :j.app_name :j.job_description :j.end_date :j.id :j.job_name
+      (group :j.app_description :j.system_id :j.app_id :j.app_name :j.job_description :j.planned_end_date :j.end_date :j.id :j.job_name
              :j.result_folder_path :j.start_date :j.status :j.username :j.app_wiki_url :j.job_type :j.parent_id
              :j.is_batch :j.notify)
       (where (exists (subselect :job_steps (where {:job_id :j.id :external_id [in external-ids]}))))
@@ -465,6 +467,7 @@
               :j.app_name
               [:j.job_description   :description]
               :j.end_date
+              :j.planned_end_date
               :j.id
               :j.job_name
               :j.result_folder_path
@@ -555,14 +558,15 @@
 
 (defn update-job
   "Updates an existing job in the database."
-  ([id {:keys [status end_date deleted name description]}]
-     (when (or status end_date deleted name description)
+  ([id {:keys [status end_date planned_end_date deleted name description]}]
+     (when (or status end_date planned_end_date deleted name description)
        (sql/update :jobs
-         (set-fields (remove-nil-values {:status          status
-                                         :end_date        end_date
-                                         :deleted         deleted
-                                         :job_name        name
-                                         :job_description description}))
+         (set-fields (remove-nil-values {:status           status
+                                         :end_date         end_date
+                                         :planned_end_date planned_end_date
+                                         :deleted          deleted
+                                         :job_name         name
+                                         :job_description  description}))
          (where {:id id}))))
   ([id status end-date]
      (update-job id {:status   status
